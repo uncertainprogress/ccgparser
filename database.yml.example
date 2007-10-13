@@ -1,0 +1,6 @@
+standard:
+  adapter: sqlserver
+  database: CCG
+  username: <user>
+  password: <pass>
+  host: localhost

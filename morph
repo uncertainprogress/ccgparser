@@ -1,0 +1,208 @@
+#The morphology for each word is in the form
+#<word>, <Lexical Category>, <stem>
+#which will allow us to add any other necessary options to the words later, such as features
+#This is a morphology notes file, as the actual morphology information comes from the database
+
+#Terminals to date
+Noun
+Pro
+Adj
+Adv
+IV
+TV
+DV
+Con
+Det
+Aux
+Prep
+
+
+#OPEN CLASSES
+#nouns
+book, Noun
+
+
+#adjectives
+
+
+#adverbs
+
+
+#verbs
+#Intransitive Verbs
+
+#Transitive Verbs
+read, IV, read
+#Ditransitive Verbs
+
+
+#CLOSED CLASSES
+#determiners
+the, Det
+a, Det
+an, Det
+
+#conjunctions
+or, Con
+but, Con
+and, Con
+
+
+#Pronouns
+others, Pro
+yourselves, Pro
+all, Pro
+another, Pro
+any, Pro
+anybody, Pro
+anyone, Pro
+anything, Pro
+both, Pro
+each, Pro
+each other, Pro
+either, Pro
+everybody, Pro
+everyone, Pro
+everything, Pro
+few, Pro
+he, Pro
+her, Pro
+hers, Pro
+herself, Pro
+him, Pro
+himself, Pro
+his, Pro
+i, Pro
+it, Pro
+its, Pro
+itself, Pro
+many, Pro
+me, Pro
+mine, Pro
+more, Pro
+most, Pro
+much, Pro
+myself, Pro
+neither, Pro
+no one, Pro
+nobody, Pro
+none, Pro
+nothing, Pro
+one, Pro
+one another, Pro
+other, Pro
+yourself, Pro
+ours, Pro
+ourselves, Pro
+she, Pro
+some, Pro
+somebody, Pro
+someone, Pro
+something, Pro
+that, Pro
+theirs, Pro
+them, Pro
+themselves, Pro
+these, Pro
+they, Pro
+this, Pro
+those, Pro
+us, Pro
+we, Pro
+yours, Pro
+
+
+#auxillary verbs
+do, Aux
+would, Aux
+could, Aux
+should, Aux
+did, Aux
+does, Aux
+have, Aux
+were, Aux
+was, Aux
+is, Aux
+are, Aux
+must, Aux
+had, Aux
+been, Aux
+being, Aux
+be, Aux
+has, Aux
+will, Aux
+can, Aux
+may, Aux
+might, Aux
+am, Aux
+
+#prepositions
+ntil, Prep
+within, Prep
+with, Prep
+about, Prep
+via, Prep
+above, Prep
+versus, Prep
+across, Prep
+upon, Prep
+up, Prep
+without, Prep
+unlike, Prep
+underneath, Prep
+under, Prep
+towards, Prep
+toward, Prep
+to, Prep
+through, Prep
+than, Prep
+since, Prep
+save, Prep
+round, Prep
+regarding, Prep
+plus, Prep
+per, Prep
+past, Prep
+over, Prep
+outside, Prep
+opposite, Prep
+onto, Prep
+on, Prep
+off, Prep
+of, Prep
+near, Prep
+minus, Prep
+like, Prep
+into, Prep
+inside, Prep
+in, Prep
+from, Prep
+for, Prep
+following, Prep
+excluding, Prep
+excepting, Prep
+except, Prep
+during, Prep
+down, Prep
+despite, Prep
+considering, Prep
+concerning, Prep
+by, Prep
+but, Prep
+beyond, Prep
+between, Prep
+besides, Prep
+beside, Prep
+beneath, Prep
+below, Prep
+behind, Prep
+along, Prep
+after, Prep
+against, Prep
+before, Prep
+at, Prep
+as, Prep
+around, Prep
+among, Prep
+amid, Prep
+aboard, Prep
