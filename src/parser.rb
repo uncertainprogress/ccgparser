@@ -3,9 +3,9 @@ require 'active_record'
 require 'yaml'
 
 #CCGParser classes
-require 'argument'
-require 'category'
-require 'word'
+require 'src/argument'
+require 'src/category'
+require 'src/word'
 
 
 module CCGParser
@@ -17,7 +17,7 @@ module CCGParser
 		#load up the lexicon and morphology, lexicon comes from the lexicon file, morphology from the database, 
 		#an ActiveRecord connection
 		def initialize
-			ActiveRecord::Base.establish_connection(YAML::load(File.open('database.yml'))['standard'])
+			ActiveRecord::Base.establish_connection(YAML::load(File.open('config/database.yml'))['standard'])
 		end
 	
 	end
