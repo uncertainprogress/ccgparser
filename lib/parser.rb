@@ -3,9 +3,9 @@ require 'active_record'
 require 'yaml'
 
 #CCGParser classes
-require 'src/argument'
-require 'src/category'
-require 'src/word'
+require 'lib/argument'
+require 'lib/category'
+require 'lib/word'
 
 
 module CCGParser

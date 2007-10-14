@@ -1,4 +1,4 @@
-require 'src/parser'
+require 'lib/parser'
 
 p = CCGParser::Parser.new
 
