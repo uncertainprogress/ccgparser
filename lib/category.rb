@@ -4,9 +4,10 @@ module CCGParser
 	#Also defines the argument application/composition behaviors with itself, for shift-reduce parsing
 	class Category
 		
+		attr_reader :reference, :root, :start, :arguments
 		
 		def initialize(definition)
-			@reference = definition[0] #this is the NP<num> from the lexicon file, for reference in debugging, etc
+			@reference = definition[0].gsub(/[\d]+$/, '') #this is the general category of the rule, NP, IV, PP, etc
 			@root = definition[1]['Root']
 			
 			#This category is a "start" category if it is one that starts the parse, etc
@@ -18,7 +19,9 @@ module CCGParser
 			definition[1].select{|k,v| k =~ /Arg*/}.sort{|a,b| a[0] <=> b[0]}.each do |arg|
 				@arguments << Argument.new(arg[1]['term'], arg[1]['slash'], arg[1]['dir'])
 			end
-		end	
+		end
+		
+		
 	end
 	
 	

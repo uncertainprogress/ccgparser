@@ -8,8 +8,13 @@ module CCGParser
 			lex = YAML::load_file(filename)
 			lex.each do |entry|
 				@entries << Category.new(entry)
-			
 			end
+			
+		end
+		
+		
+		def find(part_of_speech)
+			return @entries.select{|cat| cat.reference == part_of_speech}
 		end
 		
 	end

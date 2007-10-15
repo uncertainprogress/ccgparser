@@ -1,11 +1,11 @@
 module CCGParser
 	
 	#simple ActiveRecord model to store the words, their stems, etc
-	class Word < ActiveRecord::Base
+	class Morph
 	
-		def self.find_as_pos(word)
+		def find_as_pos(word)
 			pos = []
-			self.find(:all, :conditions => {:word => word}).each do |w|
+			Word.find(:all, :conditions => {:word => word}).each do |w|
 				if w.stem
 					pos += Word.find_as_pos(w.stem) #look at the stem of the word
 				else
