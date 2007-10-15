@@ -7,8 +7,12 @@ module CCGParser
 	#3. The modality on the slash	
 	class Argument
 		
-		def initialize(terminal, direction, modality)
+		def initialize(terminal, slash, direction)
+			@terminal = terminal
+			@slash = slash
+			@direction = direction
+		end
 		
-		end		
+		
 	end
 end

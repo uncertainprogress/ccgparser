@@ -1,0 +1,154 @@
+#This file defines the lexical categories for the CCG parser
+
+#SLASHTYPES
+#star is argument application only
+#diamond adds order-preserving composition
+#cross adds cross-element composition
+#any is an unlimited combination
+
+#Format
+#<Entry><Num>:  -The number here is arbitrary, just for reference
+#  Root Terminal: <NP, IV, TV, PP, etc>
+#  Arg0:
+#    term: <>
+#    slash: <one of star, diamond, cross, any>
+#    dir: <right or left>
+#  Arg1:
+#    term: <>
+#    slash: <one of star, diamond, cross, any>
+#    dir: <right or left>
+#for N arguments, as Arg0-ArgN, from left to right in the lexical category
+#arguments are assumed to operate right-to-left, as defined by parenthetical order of operations ((Root/Arg0)/Arg1)/Arg2).../ArgN
+
+#An entry can also include the notation Start: true if that entry has the root S, or other special circumstances
+#A Start entry is one where parsing of a sentence is begun
+
+#Nouns/Pronouns
+NP1:  #NP/Noun
+  Root: NP
+  Arg0:
+    term: Noun
+    slash: any
+    dir: right
+
+NP2:  #(NP\Det)/Noun
+  Root: NP
+  Arg0:
+    term: Det
+    slash: any
+    dir: left
+  Arg1:
+    term: Noun
+    slash: any
+    dir: right
+
+#Verb phrases, including auxillaries
+IV: #S\NP
+  Root: S
+  Start: true
+  Arg0:
+    term: NP
+    slash: any
+    dir: right
+    
+TV: #(S\NP)/NP
+  Root: S
+  Start: true
+  Arg0:
+    term: NP
+    slash: any
+    dir: left
+  Arg1:
+    term: NP
+    slash: any
+    dir: right
+    
+DV: #((S\NP)/NP)/NP
+  Root: S
+  Start: true
+  Arg0:
+    term: NP
+    slash: any
+    dir: left
+  Arg1:
+    term: NP
+    slash: any
+    dir: right
+  Arg2:
+    term: NP
+    slash: any
+    dir: right
+
+#Prepositional phrases
+
+#Conjunctions
+
+
+#Adjective phrases
+
+
+#Adverbial phrases
+
+
+
+#Nouns/Pronouns
+#Non-referential, such as "There <sentence> or It <sentence>"
+#NP = (NP\Det)/N -> "the boat" "an apple"
+#NP = NP/N
+#NP = (NP\Adj)/N
+#NP = (NP\Det)/Pro
+#NP = NP/Pro
+#NP = (NP\Adj)/Pro
+
+#Verb Phrases and Auxillaries - Gerund, participles, future/present/past perfect
+#TV = (S\NP)/NP
+#IV = VP\NP #S/NP? -> "I run"
+#DV = (S\NP)/NP/NP
+
+#Prepositional Phrases
+#PP = (PP\Prp)/Det/NP
+#PP = (PP\Prp)/NP
+
+#Conjunctions
+#AND = (X\*X)/*X
+#OR = (X\*X)/*X
+
+
+
+#Adjectives
+
+#Adverbs
+
+
+
+#S = NP VP
+#S = S conj S
+
+#NP = det noun
+#NP = det noun adj
+#NP = noun adj
+#NP = pron adj
+#NP = adj noun
+#NP = adj pron
+#NP = noun
+#NP = pron
+#NP = noun PP
+#NP = adj
+
+#VP = verb NP
+#VP = verb PP
+#VP = hverb NP
+#VP = hverb verb
+#VP = hverb verb NP
+#VP = hverb verb PP
+#VP = adv verb
+#VP = adv verb NP
+#VP = adv verb PP
+#VP = verb conj verb
+#VP = INF
+#VP = verb
+
+#INF = infto verb
+
+#PP = prep NP
+#PP = prep NP PP
