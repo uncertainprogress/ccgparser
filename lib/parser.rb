@@ -32,7 +32,12 @@ module CCGParser
 		
 		def start(string)
 			terminals = string.split.each{|word| word.strip.downcase}
-			
+			terminals.each do |word|
+				#dispatch to the parser based on if the current word position is a start point or not
+				Word.find(:all, :conditions => [word == word]).each do |w|
+					puts w.pos
+				end
+			end			
 		end
 		
 		def parse(words, startposition)
