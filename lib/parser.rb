@@ -1,13 +1,7 @@
-require 'rubygems'
-require 'active_record'
-require 'yaml'
+%w(rubygems active_record yaml).each{|f| require f}
 
 #CCGParser classes
-require 'lib/argument'
-require 'lib/category'
-require 'lib/lexicon'
-require 'lib/word'
-require 'lib/morph'
+%w(argument category lexicon word morph chartparser).each{|f| require 'lib/'+f}
 
 
 module CCGParser
@@ -22,6 +16,15 @@ module CCGParser
 	class LexiconLoadError < Exception; end
 	class CategoryShiftReduceError < Exception; end
 	class WordNotFoundError < Exception; end 
+  class IncorrectPOSError < Exception; end
+  class NoMatchingCategory < Exception; end
+  
+  def self.print_trace(prs)
+    out = '['
+    prs.each{|e| out << e.to_s + " "}
+    out << ']'
+    puts out
+  end
 	
 		
 	class Parser
@@ -30,8 +33,7 @@ module CCGParser
 		#an ActiveRecord connection
 		def initialize
 			ActiveRecord::Base.establish_connection(YAML::load(File.open('config/database.yml'))['standard'])
-			@morph = Morph.new
-			@lexicon = Lexicon.new('config/lexicon.yml')
+			Lexicon.load('config/lexicon.yml')
 		end
 		
 		def start(string)
@@ -40,22 +42,47 @@ module CCGParser
 			terminals.each_with_index do |word, i|
 				#dispatch to the parser based on whether the current word position is a start point for parsing or not
 				#this query to the dictionary returns an array of possible parts of speech for the word
-				print "#{word} - " if DEBUG_OUTPUT
-				p @morph.find_as_pos(word) if DEBUG_OUTPUT
-				@morph.find_as_pos(word).each do |pos|
-					@lexicon.find(pos).each do |cat|
+        Word.find_pos(word).each do |pos|
+					Lexicon.find(pos).each do |cat|
 						if cat.start
-							parse(terminals, i, cat)
-						end
-					end
-				end
-			end			
-		end
-		
-		def parse(words, startposition, category)
-			puts "Parsing from '#{words[startposition]}' as #{category.reference}" if DEBUG_OUTPUT
+							begin
+                parse(terminals, i, cat)
+              rescue IncorrectPOSError
+                print "Word recognized as wrong part of speech in sentence - " if DEBUG_OUTPUT
+                p terminals if DEBUG_OUTPUT
+              end              
+            end
+          end
+        end
+      end			
+    end
+    
+    protected #HERE THERE BE PRIVATE METHODS ------------------------------------
+    
+    def parse(words, startposition, category)
+      puts "\n\nParsing from '#{words[startposition]}' as #{category.reference}" if DEBUG_OUTPUT
 			
-			
-		end
-	end
+      prs = words.clone
+      prs[startposition] = category
+      
+      #terminal or category to the right?
+      if prs[startposition+1].is_a? String #terminal, need to charparse right to get a category
+        prs, startposition = ChartParser.chart_parse(prs, startposition, :right)
+        CCGParser::print_trace(prs) if DEBUG_OUTPUT
+      end
+      
+      #terminal or category to the left?
+      if prs[startposition-1].is_a? String #this is a terminal, need to chart-parse left to get a category
+        prs, startposition = ChartParser.chart_parse(prs, startposition, :left)
+        CCGParser::print_trace(prs) if DEBUG_OUTPUT
+      end
+      
+      #type raising
+      
+      #composition, left, then right
+      
+      #argument application, right, then left
+      
+    end
+  end 
 end

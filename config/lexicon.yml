@@ -9,6 +9,7 @@
 #Format
 #<Entry><Num>:  -The number here is arbitrary, just for reference
 #  Root Terminal: <NP, IV, TV, PP, etc>
+#  Raise: true #if this noun needs to be type-raised during the parse
 #  Arg0:
 #    term: <>
 #    slash: <one of star, diamond, cross, any>
@@ -22,10 +23,22 @@
 
 #An entry can also include the notation Start: true if that entry has the root S, or other special circumstances
 #A Start entry is one where parsing of a sentence is begun
+#type-raising operator
+TR:
+  Root: S
+  Arg0:
+    term: S
+    slash: any
+    dir: right
+  Arg1:
+    term: NP
+    slash: any
+    dir: left
 
 #Nouns/Pronouns
 NP1:  #NP/Noun
   Root: NP
+  Raise: true
   Arg0:
     term: Noun
     slash: any
@@ -42,6 +55,14 @@ NP2:  #(NP\Det)/Noun
     slash: any
     dir: right
 
+NP3: #(NP/Pro)
+  Root: NP
+  Raise: true
+  Arg0:
+    term: Pro
+    slash: any
+    dir: right
+
 #Verb phrases, including auxillaries
 IV: #S\NP
   Root: S
@@ -49,8 +70,8 @@ IV: #S\NP
   Arg0:
     term: NP
     slash: any
-    dir: right
-    
+    dir: left
+
 TV: #(S\NP)/NP
   Root: S
   Start: true
@@ -62,7 +83,18 @@ TV: #(S\NP)/NP
     term: NP
     slash: any
     dir: right
-    
+
+TV1: #VP/NP
+  Root: VP
+  Arg0:
+    term: NP
+    slash: any
+    dir: left
+  Arg1:
+    term: NP
+    slash: any
+    dir: right
+
 DV: #((S\NP)/NP)/NP
   Root: S
   Start: true
@@ -79,8 +111,36 @@ DV: #((S\NP)/NP)/NP
     slash: any
     dir: right
 
-#Prepositional phrases
+DV: #(VP/NP)/NP
+  Root: VP
+  Start: true
+  Arg0:
+    term: NP
+    slash: any
+    dir: left
+  Arg1:
+    term: NP
+    slash: any
+    dir: right
+  Arg2:
+    term: NP
+    slash: any
+    dir: right
 
+AUX: #(S\NP)/S
+  Root: S
+  Start: true
+  Arg0:
+    term: NP
+    slash: any
+    dir: left
+  Arg1:
+    term: VP
+    slash: any
+    dir: right
+
+#Prepositional phrases
+    #PPto
 #Conjunctions
 
 

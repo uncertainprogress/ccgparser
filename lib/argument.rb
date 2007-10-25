@@ -7,8 +7,10 @@ module CCGParser
 	#3. The modality on the slash	
 	class Argument
 		
-		def initialize(terminal, slash, direction)
-			@terminal = terminal
+    attr_reader :nonterminal, :slash, :direction
+    
+		def initialize(nonterminal, slash, direction)
+			@nonterminal = nonterminal
 			@slash = slash
 			@direction = direction
 		end
