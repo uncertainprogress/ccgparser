@@ -12,7 +12,7 @@ module CCGParser
         return ChartParser.scan(parsearray, target, startpos) unless target == nil
       end
       
-      raise IncorrectPOSError
+      raise IncorrectPOS, "From postion #{startpos} as #{parsearray[startpos].to_s} in the parse array"
     end
     
     
@@ -28,7 +28,7 @@ module CCGParser
             end
           end
           if(index == cat.arguments.length) #matched all arguments with words, in order, so this category matches
-            array[startpos+1] = cat
+            array[startpos+1] = cat.to_root #the parse is irrelevant, just need the root
             startpos.upto(index+startpos) do |n| #replace elements in the array with the new category
               array[n] = nil if array[n].is_a? String
             end
@@ -36,7 +36,7 @@ module CCGParser
           end
         end
       end
-      raise NoMatchingCategory
+      raise NoMatchingCategory, "No category exsists that matches the terminals to the right"
     end
     
     #return a new array that has replaced a terminal in the array with a category
@@ -52,7 +52,7 @@ module CCGParser
             end
           end
           if(index == cat.arguments.length) #matched all arguments with words, in order, so this category matches
-            array[startpos-1] = cat
+            array[startpos-1] = cat.to_root #the parse is irrelevant, just need the root
             1.upto(index) do |n| #replace elements in the array with the new category
               array[startpos-n] = nil if array[startpos-n].is_a? String
             end
@@ -60,7 +60,7 @@ module CCGParser
           end
         end
       end
-      raise NoMatchingCategory
+      raise NoMatchingCategory, "No category exsists that matches the terminals to the left"
     end
   end
   

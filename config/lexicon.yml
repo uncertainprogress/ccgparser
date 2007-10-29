@@ -113,7 +113,6 @@ DV: #((S\NP)/NP)/NP
 
 DV: #(VP/NP)/NP
   Root: VP
-  Start: true
   Arg0:
     term: NP
     slash: any
@@ -131,18 +130,36 @@ AUX: #(S\NP)/S
   Root: S
   Start: true
   Arg0:
-    term: NP
-    slash: any
-    dir: left
-  Arg1:
     term: VP
     slash: any
     dir: right
 
 #Prepositional phrases
     #PPto
-#Conjunctions
 
+PP1: #(PP\Prep)/NP
+  Root: PP
+  Arg0:
+    term: Prep
+    slash: any
+    dir: left
+  Arg1:
+    term: NP
+    slash: any
+    dir: right
+
+#Conjunctions
+CON: #X\*X/*X
+  Root: X
+  Start: true
+  Arg0:
+    term: X
+    slash: star
+    dir: left
+  Arg1:
+    term: X
+    slash: star
+    dir: right
 
 #Adjective phrases
 

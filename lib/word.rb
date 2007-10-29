@@ -13,7 +13,7 @@ module CCGParser
 				end				
 			end
 			
-			raise WordNotFound unless pos.length > 0
+			raise WordNotFound.new("#{word}") unless pos.length > 0
 			return pos
 		end
    
