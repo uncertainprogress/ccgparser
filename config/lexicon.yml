@@ -36,6 +36,10 @@ TR:
     dir: left
 
 #Nouns/Pronouns
+#NP -> Noun
+#NP -> Pro
+#NP -> Det Noun
+#NP -> Det Pro
 NP1:  #NP/Noun
   Root: NP
   Raise: true
@@ -59,6 +63,17 @@ NP3: #(NP/Pro)
   Root: NP
   Raise: true
   Arg0:
+    term: Pro
+    slash: any
+    dir: right
+
+NP4: #(NP\Det)/Pro
+  Root: NP
+  Arg0:
+    term: Det
+    slash: any
+    dir: left
+  Arg1:
     term: Pro
     slash: any
     dir: right

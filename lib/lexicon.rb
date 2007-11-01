@@ -17,5 +17,8 @@ module CCGParser
 			return @@entries.select{|cat| cat.reference == part_of_speech}.sort{|a,b| b.num_arguments <=> a.num_arguments}
 		end
 		
+    def self.contains?(nonterminal)
+      return @@entries.select{|cat| cat.reference == nonterminal}.length > 0
+    end
 	end
 end

@@ -1,11 +1,13 @@
 %w(rubygems active_record yaml).each{|f| require f}
 
 #CCGParser classes
-%w(argument category lexicon word morph chartparser).each{|f| require 'lib/'+f}
+%w(argument category lexicon word morph chartparser edge edgelist).each{|f| require 'lib/'+f}
 
 
 module CCGParser
 	DEBUG_OUTPUT = true
+  DEBUG_CP = true
+  DEBUG_CP_EDGES = true
 
 	SLASHTYPES = {:star => true, :diamond => true, :cross => true, :any => true}.freeze
 	#star is argument application only
@@ -17,6 +19,7 @@ module CCGParser
 	class CategoryShiftReduceError < Exception; end
 	class WordNotFound < Exception; end 
   class IncorrectPOS < Exception; end
+  class ChartParseError < Exception; end
   class NoMatchingCategory < Exception; end
   class NoSlashArgument < Exception; end
   
@@ -53,6 +56,8 @@ module CCGParser
                 puts "Word recognized as wrong part of speech in sentence - #{e.message} " if DEBUG_OUTPUT
               rescue NoMatchingCategory => e
                 puts e.message
+              rescue ChartParseError => e
+                puts e.message
               end              
             end
           end
@@ -75,14 +80,16 @@ module CCGParser
       
       #terminal or category to the left?
       if prs[startposition-1].is_a? String #this is a terminal, need to chart-parse left to get a category
-        prs, startposition = ChartParser.chart_parse(prs, startposition, :left)
+        numparsed = ChartParser.new.parse(prs[0..startposition-1].reverse, prs[startposition], :left)
+        raise IncorrectPOS, "#{category} is an incorrect part of speech." unless numparsed
+        
         CCGParser::print_trace(prs) if DEBUG_OUTPUT
       end
       
       #terminal or category to the right?
       if prs[startposition+1].is_a? String #terminal, need to charparse right to get a category
-        prs, startposition = ChartParser.chart_parse(prs, startposition, :right)
-        CCGParser::print_trace(prs) if DEBUG_OUTPUT
+        numparsed = ChartParser.new.parse(prs[startposition+1..prs.length-1], prs[startposition], :right)
+        raise IncorrectPOS, "#{category} is an incorrect part of speech." unless numparsed
       end
       
       #type raising

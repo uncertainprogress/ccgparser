@@ -23,5 +23,9 @@ module CCGParser
       raise WordNotFound
     end
     
+    def self.contains? word
+      return Word.find(:all, :conditions => {:word => word}).length > 0
+    end
+    
 	end
 end

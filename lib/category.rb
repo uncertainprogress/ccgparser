@@ -87,6 +87,12 @@ module CCGParser
       return cat
     end
     
+    def argument_NT_list
+      list = []
+      @arguments.each{|arg| list << arg.nonterminal }
+      list
+    end
+    
     def first_arg_left
       @arguments.each{|arg| return arg.nonterminal if arg.direction == 'left'}
       return nil
