@@ -6,8 +6,8 @@
 
 module CCGParser
 	DEBUG_OUTPUT = true
-  DEBUG_CP = true
-  DEBUG_CP_EDGES = true
+  DEBUG_CP = false
+  DEBUG_CP_EDGES = false
 
 	SLASHTYPES = {:star => true, :diamond => true, :cross => true, :any => true}.freeze
 	#star is argument application only
@@ -64,8 +64,8 @@ module CCGParser
         end
       end
       
-      rescue WordNotFound => e
-        puts "Word not in dictionary: #{e.message}"
+    rescue WordNotFound => e
+      puts "Word not in dictionary: #{e.message}"
         
     end
     
@@ -80,36 +80,53 @@ module CCGParser
       
       #terminal or category to the left?
       if prs[startposition-1].is_a? String #this is a terminal, need to chart-parse left to get a category
-        numparsed = ChartParser.new.parse(prs[0..startposition-1].reverse, prs[startposition], :left)
+        numparsed, newcat = ChartParser.new.parse(prs[0..startposition-1].reverse, prs[startposition], :left)
         raise IncorrectPOS, "#{category} is an incorrect part of speech." unless numparsed
-        
+        numparsed.downto(1) {|n| prs[startposition - n] = nil}
+        prs[startposition-1] = newcat
+        prs.compact!
+        startposition -= numparsed-1
         CCGParser::print_trace(prs) if DEBUG_OUTPUT
       end
       
       #terminal or category to the right?
       if prs[startposition+1].is_a? String #terminal, need to charparse right to get a category
-        numparsed = ChartParser.new.parse(prs[startposition+1..prs.length-1], prs[startposition], :right)
+        numparsed, newcat = ChartParser.new.parse(prs[startposition+1..prs.length-1], prs[startposition], :right)
         raise IncorrectPOS, "#{category} is an incorrect part of speech." unless numparsed
+        numparsed.downto(1) {|n| prs[startposition + n] = nil}
+        prs[startposition + 1] = newcat
+        prs.compact!
+        CCGParser::print_trace(prs) if DEBUG_OUTPUT
       end
       
       #type raising
       #if the category at position-1 is an NP for type-raising, then replace the previous NP with the type-raising operator
-      
-      
+      if prs[startposition-1].typeraise 
+        newcat = prs[startposition-1].raise_with(prs[startposition])
+        if newcat
+          prs[startposition-1] = nil
+          prs[startposition] = newcat
+          startposition -= 1
+          prs.compact!
+          CCGParser::print_trace(prs) if DEBUG_OUTPUT
+        end
+      end
       
       #composition, left, then right
       newcat = prs[startposition-1].compose_with(prs[startposition])
       if newcat
         prs[startposition] = newcat
-        prs[startpostion-1] = nil
+        prs[startposition-1] = nil
         startposition -= 1
         prs.compact!
+        CCGParser::print_trace(prs) if DEBUG_OUTPUT
       end
       newcat = prs[startposition].compose_with(prs[startposition+1])
       if newcat
         prs[startposition] = newcat
-        prs[startpostion+1] = nil
+        prs[startposition+1] = nil
         prs.compact!
+        CCGParser::print_trace(prs) if DEBUG_OUTPUT
       end
       
       #argument application

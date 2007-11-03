@@ -4,6 +4,7 @@ module CCGParser
     def initialize
       @reverse = false
       @edgelist = Edgelist.new
+      @typeraise = false
     end
     
     def parse(terminals, category, direction)
@@ -17,7 +18,7 @@ module CCGParser
         target = category.first_arg_right
       end
       
-      raise IncorrectPOS, "#{category} is not the right part of speech" unless target
+      raise IncorrectPOS, "#{category} is not the right category" unless target
       puts "ChartParse #{direction} to find #{target} in #{terminals}" if DEBUG_CP
       @rootedge = Edge.new(target, []<<target, 0, 0, 0)
       add_edge @rootedge
@@ -31,9 +32,11 @@ module CCGParser
     	puts @rootedge.print_with_children if DEBUG_CP_EDGES
       
       #finished, the rootedge should have links to the full tree
-      return @rootedge.endindex
+      return @rootedge.endindex, Lexicon.find(@rootedge.startNT).first.to_root unless @typeraise && direction == :left
+      #I think this is the only thing tied to the english language
+      return @rootedge.endindex, Lexicon.find("TR").first if @typeraise && @rootedge.startNT == 'NP' && direction == :left 
       
-      nil
+      raise ChartParseError, "Unknown chart-parse error"
     end
     
     def add_edge newedge
@@ -90,11 +93,12 @@ module CCGParser
           if curredge.currentNT == category #edge match
             add_edge Edge.new(curredge.currentNT, Array.new(1) {word}, i, i+1, 1)
             match = true
+            @typeraise = true
           end
         end
       end
       #don't allow a scan without some kind of extension match to another rule
-      raise ChartParseError, "POS not found to match #{word} when scanning" unless match
+      raise ChartParseError, "POS not found to match '#{word}' when scanning" unless match
     end
     
   end

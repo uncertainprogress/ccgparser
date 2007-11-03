@@ -27,24 +27,51 @@ module CCGParser
 		end
     
     #return a new category composed of the two
-    def compose_with(othercat)
-      return nil unless self.has_arguments? && othercat && othercat.has_arguments?
+    def compose_with(other)
+      return nil unless self.has_arguments? && other && other.has_arguments?
       
       #determine the slash-type of both categories, 
       selfslash = self.slash_type
-      otherslash = othercat.slash_type
+      otherslash = other.slash_type
       
-      return nil if selfslash == 'star' || otherslash == 'star' #don't allow composition on categories that only allow application
-      #all other slashes compose in various ways, based on slash hierarchy
+      #don't allow composition on categories that only allow application
+      #treat star slash application like a special case here, for conjunctions, etc, since it's going to be an application of the whole category,
+      #instead of pieces of each
+      if selfslash == 'star' || otherslash == 'star' 
+        
+      end
       
       if selfslash == 'diamond' || otherslash == 'diamond' #order-preserved composition
         
       elsif selfslash == 'cross' || otherslash == 'cross' #any composition, includes the "any" slash
         
+      else #two "any" slashes composing
+                      
       end
       
       return nil #failure, no composition
     end
+    
+    #type raising operation
+    def raise_with(other)
+      puts "Type raise #{self} with #{other}" if DEBUG_OUTPUT
+      self.arguments.each_with_index do |selfarg, i|
+        if selfarg.nonterminal == other.root #start the composition here
+          other.arguments.each_with_index do |otherarg, j|
+            if self.arguments[j+i+1] 
+              next if otherarg == self.arguments[j+i+1] #match the arguments
+              return nil if otherarg != self.arguments[j+i+1] #fail, these categories won't compose
+            end
+            #otherwise, we've reached the end of self, and need to compose and return a new category
+            self.arguments = []
+            self.arguments += other.arguments[j..other.arguments.length-1]
+            return self
+          end
+        end
+      end
+    end
+    
+    
     
     #return a new category from this category applying from either the right or the left, depending
     def apply(prs, position) #array of categories, and position of this category

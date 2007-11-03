@@ -26,6 +26,7 @@
 #type-raising operator
 TR:
   Root: S
+  Raise: true
   Arg0:
     term: S
     slash: any

@@ -15,6 +15,8 @@ module CCGParser
 			@direction = direction
 		end
 		
-		
+		def ==(other)
+      return self.nonterminal == other.nonterminal && self.slash == other.slash && self.direction == other.direction
+    end
 	end
 end
