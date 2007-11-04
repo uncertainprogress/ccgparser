@@ -4,7 +4,8 @@ module CCGParser
 	#Also defines the argument application/composition behaviors with itself, for shift-reduce parsing
 	class Category
 		
-		attr_reader :reference, :root, :start, :typeraise
+		attr_reader :reference, :root, :start
+    attr_accessor :typeraise
     attr_accessor :arguments
 		
 		def initialize(definition)
@@ -65,10 +66,12 @@ module CCGParser
             #otherwise, we've reached the end of self, and need to compose and return a new category
             self.arguments = []
             self.arguments += other.arguments[j..other.arguments.length-1]
+            self.typeraise = false
             return self
           end
         end
       end
+      return nil
     end
     
     

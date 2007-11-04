@@ -52,7 +52,7 @@ module CCGParser
 						if cat.start
 							begin
                 puts "\n\nParsing from '#{terminals[i]}' as #{cat.reference}" if DEBUG_OUTPUT
-                return if parse(terminals.compact, i, cat)
+                return if parse(terminals.compact.clone, i, cat)
               rescue IncorrectPOS => e
                 puts "Word recognized as wrong part of speech in sentence - #{e.message} " if DEBUG_OUTPUT
               rescue NoMatchingCategory => e
@@ -73,7 +73,8 @@ module CCGParser
     protected #HERE THERE BE PRIVATE METHODS ------------------------------------
     
     def parse(prs, startposition, category)
-      return true if prs.length <= 1 #we're done if there's only one non-terminal in the parse array			
+      return true if prs.length <= 1 && prs[0].root == "S" && !prs[0].has_arguments? #we're done if there's only one non-terminal in the parse array
+      raise IncorrectPOS, "#{category} is not the right part of speech" if prs.length <= 1
       
       prs[startposition] = category
      
@@ -104,14 +105,16 @@ module CCGParser
       
       #type raising
       #if the category at position-1 is an NP for type-raising, then replace the previous NP with the type-raising operator
-      if prs[startposition-1].typeraise 
-        newcat = prs[startposition-1].raise_with(prs[startposition])
-        if newcat
-          prs[startposition-1] = nil
-          prs[startposition] = newcat
-          startposition -= 1
-          prs.compact!
-          CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
+      if startposition > 0
+        if prs[startposition-1].typeraise 
+          newcat = prs[startposition-1].raise_with(prs[startposition])
+          if newcat
+            prs[startposition-1] = nil
+            prs[startposition] = newcat
+            startposition -= 1
+            prs.compact!
+            CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
+          end
         end
       end
       
@@ -155,7 +158,6 @@ module CCGParser
       CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
       
       parse(prs, startposition, prs[startposition]) #recursively parse
-      
     end
   end 
 end
