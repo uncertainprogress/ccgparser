@@ -37,6 +37,7 @@ TR:
     dir: left
 
 #Nouns/Pronouns
+#NP -> NP PP
 #NP -> Noun
 #NP -> Pro
 #NP -> Det Noun
@@ -79,6 +80,16 @@ NP4: #(NP\Det)/Pro
     slash: any
     dir: right
 
+NP5: #(NP\NP)/PP
+  Root: NP
+  Arg0: 
+    term: NP
+    slash: any
+    dir: left
+  Arg1:
+    term: PP
+    slash: any
+    dir: right
 #Verb phrases, including auxillaries
 IV: #S\NP
   Root: S
@@ -91,17 +102,6 @@ IV: #S\NP
 TV: #(S\NP)/NP
   Root: S
   Start: true
-  Arg0:
-    term: NP
-    slash: any
-    dir: left
-  Arg1:
-    term: NP
-    slash: any
-    dir: right
-
-TV1: #VP/NP
-  Root: VP
   Arg0:
     term: NP
     slash: any
@@ -127,7 +127,7 @@ DV: #((S\NP)/NP)/NP
     slash: any
     dir: right
 
-DV: #(VP/NP)/NP
+DV1: #(VP/NP)/NP
   Root: VP
   Arg0:
     term: NP
@@ -142,17 +142,46 @@ DV: #(VP/NP)/NP
     slash: any
     dir: right
 
-AUX: #(S\NP)/S
+VP: #(VP\Verb)/NP
+  Root: VP
+  Arg0:
+    term: Verb
+    slash: any
+    dir: left
+  Arg1:
+    term: NP
+    slash: any
+    dir: right
+
+VP1: #((VP\Verb)/NP)/PP
+  Root: VP
+  Arg0:
+    term: Verb
+    slash: any
+    dir: left
+  Arg1:
+    term: NP
+    slash: any
+    dir: right
+  Arg2:
+    term: PP
+    slash: any
+    dir: right
+
+AUX: #S\NP/VP
   Root: S
   Start: true
   Arg0:
+    term: NP
+    slash: any
+    dir: left
+  Arg1:
     term: VP
     slash: any
     dir: right
 
 #Prepositional phrases
     #PPto
-
 PP1: #(PP\Prep)/NP
   Root: PP
   Arg0:

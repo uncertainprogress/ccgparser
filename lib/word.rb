@@ -9,7 +9,7 @@ module CCGParser
 				if w.stem
 					pos += Word.find_pos(w.stem) #look at the stem of the word
 				else
-					pos << w.pos
+					pos << w
 				end				
 			end
 			

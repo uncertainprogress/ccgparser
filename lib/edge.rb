@@ -2,14 +2,16 @@ module CCGParser
   class Edge
     
     attr_accessor :startindex, :endindex, :startNT, :bodyNTlist, :bodyNTindex, :childedges
+    attr_reader :rootedge
   
-    def initialize startnonterm, bodynonterminals, startpos, endpos, ntindex
+    def initialize(startnonterm, bodynonterminals, startpos, endpos, ntindex, rootedge = false)
       @startindex = startpos
       @endindex = endpos
       @startNT = startnonterm
       @bodyNTlist = bodynonterminals #array of nonterminals
       @bodyNTindex = ntindex
       @childedges = Array.new(bodynonterminals.length)
+      @rootedge = rootedge
     end
     
     def at_end

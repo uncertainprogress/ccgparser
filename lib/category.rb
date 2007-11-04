@@ -76,7 +76,7 @@ module CCGParser
     #return a new category from this category applying from either the right or the left, depending
     def apply(prs, position) #array of categories, and position of this category
       
-      if self.arguments.last.direction == "left"
+      if self.arguments.last.direction == "left" && position != 0 #can't be at the left end of the array
         raise(IncorrectPOS, "From postion #{position} as #{prs[position].to_s} in the parse array") unless prs[position-1]
         
         if (!prs[position-1].has_arguments?) && (self.arguments.last.nonterminal == prs[position-1].root)
@@ -86,7 +86,7 @@ module CCGParser
       elsif self.arguments.last.direction == "right"
         raise(IncorrectPOS, "From postion #{position} as #{prs[position].to_s} in the parse array") unless prs[position+1]
         
-        if (!prs[position+1].has_arguments?) && (self.arguments.last.nonterminal == prs[position-1].root)
+        if (!prs[position+1].has_arguments?) #&& (self.arguments.last.nonterminal == prs[position-1].root)
           self.remove_last_arg
           return self, :right
         end

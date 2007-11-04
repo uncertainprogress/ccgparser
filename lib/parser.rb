@@ -23,10 +23,10 @@ module CCGParser
   class NoMatchingCategory < Exception; end
   class NoSlashArgument < Exception; end
   
-  def self.print_trace(prs)
+  def self.print_trace(prs, position)
     out = '['
     prs.each{|e| out << e.to_s + " "}
-    out << ']'
+    out << "] at #{position.to_s}"
     puts out
   end
 	
@@ -42,16 +42,17 @@ module CCGParser
 		
 		def start(string)
       terminals = string.split.map{|word| word.downcase.strip}
-			p terminals if DEBUG_OUTPUT
+      puts "\n---------------PARSING:---------------"
+      p terminals if DEBUG_OUTPUT
 			terminals.each_with_index do |word, i|
 				#dispatch to the parser based on whether the current word position is a start point for parsing or not
 				#this query to the dictionary returns an array of possible parts of speech for the word
-        Word.find_pos(word).each do |pos|
-					Lexicon.find(pos).each do |cat|
+        Word.find_pos(word).each do |w|
+					Lexicon.find(w.pos).each do |cat|
 						if cat.start
 							begin
                 puts "\n\nParsing from '#{terminals[i]}' as #{cat.reference}" if DEBUG_OUTPUT
-                parse(terminals.compact, i, cat)
+                return if parse(terminals.compact, i, cat)
               rescue IncorrectPOS => e
                 puts "Word recognized as wrong part of speech in sentence - #{e.message} " if DEBUG_OUTPUT
               rescue NoMatchingCategory => e
@@ -72,21 +73,23 @@ module CCGParser
     protected #HERE THERE BE PRIVATE METHODS ------------------------------------
     
     def parse(prs, startposition, category)
-      return if prs.length <= 1 #we're done if there's only one non-terminal in the parse array			
+      return true if prs.length <= 1 #we're done if there's only one non-terminal in the parse array			
       
       prs[startposition] = category
      
-      CCGParser::print_trace(prs) if DEBUG_OUTPUT
+      CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
       
       #terminal or category to the left?
-      if prs[startposition-1].is_a? String #this is a terminal, need to chart-parse left to get a category
-        numparsed, newcat = ChartParser.new.parse(prs[0..startposition-1].reverse, prs[startposition], :left)
-        raise IncorrectPOS, "#{category} is an incorrect part of speech." unless numparsed
-        numparsed.downto(1) {|n| prs[startposition - n] = nil}
-        prs[startposition-1] = newcat
-        prs.compact!
-        startposition -= numparsed-1
-        CCGParser::print_trace(prs) if DEBUG_OUTPUT
+      unless startposition == 0
+        if prs[startposition-1].is_a? String #this is a terminal, need to chart-parse left to get a category
+          numparsed, newcat = ChartParser.new.parse(prs[0..startposition-1].reverse, prs[startposition], :left)
+          raise IncorrectPOS, "#{category} is an incorrect part of speech." unless numparsed
+          numparsed.downto(1) {|n| prs[startposition - n] = nil}
+          prs[startposition-1] = newcat
+          prs.compact!
+          startposition -= numparsed-1
+          CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
+        end
       end
       
       #terminal or category to the right?
@@ -96,7 +99,7 @@ module CCGParser
         numparsed.downto(1) {|n| prs[startposition + n] = nil}
         prs[startposition + 1] = newcat
         prs.compact!
-        CCGParser::print_trace(prs) if DEBUG_OUTPUT
+        CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
       end
       
       #type raising
@@ -108,25 +111,28 @@ module CCGParser
           prs[startposition] = newcat
           startposition -= 1
           prs.compact!
-          CCGParser::print_trace(prs) if DEBUG_OUTPUT
+          CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
         end
       end
       
       #composition, left, then right
-      newcat = prs[startposition-1].compose_with(prs[startposition])
-      if newcat
-        prs[startposition] = newcat
-        prs[startposition-1] = nil
-        startposition -= 1
-        prs.compact!
-        CCGParser::print_trace(prs) if DEBUG_OUTPUT
+      if(startposition > 0)
+        newcat = prs[startposition-1].compose_with(prs[startposition])
+        if newcat
+          prs[startposition] = newcat
+          prs[startposition-1] = nil
+          startposition -= 1
+          prs.compact!
+          CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
+        end
       end
+      
       newcat = prs[startposition].compose_with(prs[startposition+1])
       if newcat
         prs[startposition] = newcat
         prs[startposition+1] = nil
         prs.compact!
-        CCGParser::print_trace(prs) if DEBUG_OUTPUT
+        CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
       end
       
       #argument application
@@ -146,7 +152,7 @@ module CCGParser
        
       end
         
-      CCGParser::print_trace(prs) if DEBUG_OUTPUT
+      CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
       
       parse(prs, startposition, prs[startposition]) #recursively parse
       
