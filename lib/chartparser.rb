@@ -18,7 +18,7 @@ module CCGParser
         target = category.first_arg_right
       end
       
-      raise IncorrectPOS, "#{category} is not the right category" unless target
+      raise IncorrectPOS, "#{category} does not combine within the sentence" unless target
       puts "ChartParse #{direction} to find #{target} in #{terminals}" if DEBUG_CP
       @rootedge = Edge.new(target, []<<target, 0, 0, 0, true)
       add_edge @rootedge
@@ -31,7 +31,6 @@ module CCGParser
       
       #fail if the root edge hasn't been fully consumed
       raise ChartParseError, "#{target} not found in terminal array to the #{direction}" unless @rootedge.at_end
-    	#puts @rootedge.print_with_children if DEBUG_CP_EDGES
       
       #finished, the rootedge should have links to the full tree
       return @rootedge.endindex, Lexicon.find(@rootedge.startNT).first.to_root unless @typeraise && direction == :left

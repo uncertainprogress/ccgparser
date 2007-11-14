@@ -75,7 +75,6 @@ module CCGParser
     end
     
     
-    
     #return a new category from this category applying from either the right or the left, depending
     def apply(prs, position) #array of categories, and position of this category
       
