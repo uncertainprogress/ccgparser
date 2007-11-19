@@ -22,11 +22,12 @@ module CCGParser
   class ChartParseError < Exception; end
   class NoMatchingCategory < Exception; end
   class NoSlashArgument < Exception; end
+	class NoCombinationCategories < Exception; end
   
-  def self.print_trace(prs, position)
+  def self.print_trace(prs, position, message)
     out = '['
     prs.each{|e| out << e.to_s + " "}
-    out << "] at #{position.to_s}"
+    out << "] at #{position.to_s} -- #{message}"
     puts out
   end
 	
@@ -52,13 +53,13 @@ module CCGParser
 				posarr = []
 				Word.find_pos(word).each do |w|
 					Lexicon.find(w.pos).each do |cat|
-						posarr << cat if cat.start
+						posarr << cat.clone if cat.start
 					end
 				end
 				if posarr.length > 0
 					startarray << posarr
 				else
-					startarray[i] = word
+					startarray[i] = word.clone
 				end
       end
 			parse_from(startarray, 0)
@@ -75,31 +76,38 @@ module CCGParser
 			
 			return parse(termarray, position, termarray[position]) if(run_parse)
 			
+			#otherwise, look for another parse
 			termarray.each_with_index do |arr, i|
 				next unless i > position
 				next unless arr.is_a?(Array) && arr.length > 0
 				arr.each do |cat|
 					newarr = termarray.clone
-					newarr[i] = cat
+					newarr[i] = cat.clone
 					begin
-						parse_from(newarr, i)
+						return if parse_from(newarr, i)
 					rescue IncorrectPOS => e
 						puts "Wrong starting part of speech - #{e.message} \n\n" if DEBUG_OUTPUT
 					rescue NoMatchingCategory => e
 						puts "#{e.message} \n\n" if DEBUG_OUTPUT
 					rescue ChartParseError => e 
 						puts "#{e.message} \n\n" if DEBUG_OUTPUT
+					rescue NoCombinationCategories => e
+						puts "Failure to find combinable categories \n\n" if DEBUG_OUTPUT
+					rescue NoMethodError => e
+						puts "Failure to find combinalble categories \n\n" if DEBUG_OUTPUT
 					end
 				end
 			end
+			return false
 		end
 		
 		
 		def parse(prs, startposition, category)
 			return true if prs.length <= 1 && prs[0].root == "S" && !prs[0].has_arguments? #we're done if there's only one non-terminal in the parse array
 			raise IncorrectPOS, "#{category} is not the right part of speech" if prs.length <= 1
-     
-			CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
+			combined = false
+			
+			CCGParser::print_trace(prs, startposition, "Start") if DEBUG_OUTPUT
       
 			#terminal or category to the left?
 			unless startposition == 0
@@ -107,10 +115,11 @@ module CCGParser
 					numparsed, newcat = ChartParser.new.parse(prs[0..startposition-1].reverse, prs[startposition], :left)
 					raise IncorrectPOS, "#{category} is an incorrect part of speech." unless numparsed
 					numparsed.downto(1) {|n| prs[startposition - n] = nil}
-					prs[startposition-1] = newcat
+					prs[startposition-1] = newcat.clone
 					prs.compact!
 					startposition -= numparsed-1
-					CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
+					CCGParser::print_trace(prs, startposition, "CP Left") if DEBUG_OUTPUT
+					combined = true
 				end
 			end
       
@@ -119,9 +128,10 @@ module CCGParser
 				numparsed, newcat = ChartParser.new.parse(prs[startposition+1..prs.length-1], prs[startposition], :right)
 				raise IncorrectPOS, "#{category} is an incorrect part of speech." unless numparsed
 				numparsed.downto(1) {|n| prs[startposition + n] = nil}
-				prs[startposition + 1] = newcat
+				prs[startposition + 1] = newcat.clone
 				prs.compact!
-				CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
+				CCGParser::print_trace(prs, startposition, "CP Right") if DEBUG_OUTPUT
+				combined = true
 			end
       
 			#type raising
@@ -131,10 +141,11 @@ module CCGParser
 					newcat = prs[startposition-1].raise_with(prs[startposition])
 					if newcat
 						prs[startposition-1] = nil
-						prs[startposition] = newcat
+						prs[startposition] = newcat.clone
 						startposition -= 1
 						prs.compact!
-						CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
+						CCGParser::print_trace(prs, startposition, "Type Raise") if DEBUG_OUTPUT
+						combined = true
 					end
 				end
 			end
@@ -143,43 +154,52 @@ module CCGParser
 			if startposition > 0 && prs[startposition-1].is_a?(Category) 
 				newcat = prs[startposition-1].compose_with(prs[startposition])
 				if newcat
-					prs[startposition] = newcat
+					prs[startposition] = newcat.clone
 					prs[startposition-1] = nil
 					startposition -= 1
 					prs.compact!
-					CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
+					CCGParser::print_trace(prs, startposition, "Compose Left") if DEBUG_OUTPUT
+					combined = true
 				end
 			end
       
 			if prs[startposition-1].is_a?(Category) 
 				newcat = prs[startposition].compose_with(prs[startposition+1])
 				if newcat
-					prs[startposition] = newcat
+					prs[startposition] = newcat.clone
 					prs[startposition+1] = nil
 					prs.compact!
-					CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
+					CCGParser::print_trace(prs, startposition, "Compose Right") if DEBUG_OUTPUT
+					combined = true
 				end
 			end
       
 			#argument application
 			newcat, direction = prs[startposition].apply(prs, startposition)
 			newcat = newcat.to_root unless newcat.has_arguments?
+			
 			case(direction)
 			when :left
-				prs[startposition-1] = newcat
+				prs[startposition-1] = newcat.clone
 				prs[startposition] = nil
 				startposition -= 1
 				prs.compact!
+				combined = true
 			when :right
-				prs[startposition] = newcat
+				prs[startposition] = newcat.clone
 				prs[startposition + 1] = nil
 				prs.compact!
+				startposition -= 1 unless newcat.has_arguments?
+				startposition = 0 if startposition < 0
+				combined = true
 			when nil #no application
        
 			end
         
-			CCGParser::print_trace(prs, startposition) if DEBUG_OUTPUT
+			CCGParser::print_trace(prs, startposition, "Apply - #{direction}") if DEBUG_OUTPUT
       
+			raise NoCombinationCategories unless combined
+			
 			parse(prs, startposition, prs[startposition]) #recursively parse
 		end
 	end 

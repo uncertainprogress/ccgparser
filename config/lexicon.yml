@@ -90,6 +90,7 @@ NP5: #(NP\NP)/PP
     term: PP
     slash: any
     dir: right
+
 #Verb phrases, including auxillaries
 IV: #S\NP
   Root: S
@@ -98,6 +99,22 @@ IV: #S\NP
     term: NP
     slash: any
     dir: left
+
+IV1: #VP
+  Root: VP
+  Start: true
+
+TV: #(S\NP)/NP
+  Root: S
+  Start: true
+  Arg0:
+    term: NP
+    slash: any
+    dir: left
+  Arg1:
+    term: NP
+    slash: any
+    dir: right
 
 TV1: #(S\NP)/PP/NP
   Root: S
@@ -115,13 +132,21 @@ TV1: #(S\NP)/PP/NP
     slash: any
     dir: right
 
-TV: #(S\NP)/NP
-  Root: S
+TV2: #VP/NP
+  Root: VP
   Start: true
   Arg0:
     term: NP
     slash: any
-    dir: left
+    dir: right
+
+TV3: #VP/PP/NP
+  Root: VP
+  Start: true
+  Arg0:
+    term: PP
+    slash: any
+    dir: right
   Arg1:
     term: NP
     slash: any
@@ -175,7 +200,6 @@ DV1: #((S\NP)/NP)/PPto
     slash: any
     dir: right
 
-
 VP: #VP/Verb
   Root: VP
   Arg0:
@@ -196,7 +220,7 @@ AUX: #S\NP/VP
     slash: any
     dir: right
 
-AUX: #S\NP/NP/VP
+AUX1: #S\NP/NP/VP
   Root: S
   Aux: true
   Start: true

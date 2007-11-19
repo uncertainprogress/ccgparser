@@ -55,7 +55,6 @@ module CCGParser
     
     #type raising operation
     def raise_with(other)
-      puts "Type raise #{self} with #{other}" if DEBUG_OUTPUT
       self.arguments.each_with_index do |selfarg, i|
         if selfarg.nonterminal == other.root #start the composition here
           other.arguments.each_with_index do |otherarg, j|
@@ -78,23 +77,25 @@ module CCGParser
     #return a new category from this category applying from either the right or the left, depending
     def apply(prs, position) #array of categories, and position of this category
       
-      if self.arguments.last.direction == "left" && position != 0 #can't be at the left end of the array
+      if self.arguments.length > 0 && self.arguments.last.direction == "left" && position != 0 #can't be at the left end of the array
         raise(IncorrectPOS, "From postion #{position} as #{prs[position].to_s} in the parse array") unless prs[position-1]
         
         if (!prs[position-1].has_arguments?) && (self.arguments.last.nonterminal == prs[position-1].root)
-          self.remove_last_arg
-          return self, :left
+          newcat = self.clone
+					newcat.remove_last_arg
+          return newcat, :left
         end
-      elsif self.arguments.last.direction == "right"
+      elsif self.arguments.length > 0 && self.arguments.last.direction == "right"
         raise(IncorrectPOS, "From postion #{position} as #{prs[position].to_s} in the parse array") unless prs[position+1]
         
-        if (!prs[position+1].has_arguments?) #&& (self.arguments.last.nonterminal == prs[position-1].root)
-          self.remove_last_arg
-          return self, :right
+        if !prs[position+1].has_arguments? && (self.arguments.last.nonterminal == prs[position+1].root)
+          newcat = self.clone
+					newcat.remove_last_arg
+          return newcat, :right
         end
       end
       
-      return self, nil #return this category, and no direction on failure 
+      return self.clone, nil #return this category, and no direction on failure 
     end
         
     def num_arguments
@@ -159,8 +160,11 @@ module CCGParser
       out
     end
 		
+		def clone
+			Marshal::load(Marshal.dump(self))
+		end
+		
 	end
-	
 	
 	class HybridCategory < Category
 		def initialize(root, arguments)

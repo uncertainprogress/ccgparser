@@ -33,7 +33,7 @@ module CCGParser
       raise ChartParseError, "#{target} not found in terminal array to the #{direction}" unless @rootedge.at_end
       
       #finished, the rootedge should have links to the full tree
-      return @rootedge.endindex, Lexicon.find(@rootedge.startNT).first.to_root unless @typeraise && direction == :left
+      return @rootedge.endindex, Lexicon.find(@rootedge.startNT).first.clone.to_root unless @typeraise && direction == :left
       #I think this is the only thing tied to the english language
       return @rootedge.endindex, Lexicon.find("TR").first.clone if @typeraise && @rootedge.startNT == 'NP' && direction == :left 
       
@@ -75,9 +75,9 @@ module CCGParser
           end
         end
         
-#        if curredge.rootedge && !newedge.rootedge #always try and extend the root edge, to make sure the longest possible parse is returned
-#          if (newedge.startNT == curredge.startNT) #this is a valid extension
-#            #curredge.childedges[curredge.bodyNTindex-1] = newedge
+#        if curredge.rootedge && !newedge.rootedge always try and extend the root edge, to make sure the longest possible parse is returned
+#          if (newedge.startNT == curredge.startNT) this is a valid extension
+#            curredge.childedges[curredge.bodyNTindex-1] = newedge
 #            curredge.endindex = newedge.endindex
 #          end
 #        end
@@ -89,7 +89,7 @@ module CCGParser
       return unless Lexicon.contains?(newedge.currentNT)
       puts 'Predict: ' + newedge.to_s if DEBUG_CP
       Lexicon.find(newedge.currentNT).each do |nt|
-        termlist = nt.argument_NT_list
+        termlist = nt.clone.argument_NT_list
         termlist.reverse! if @reverse
         add_edge Edge.new(newedge.currentNT, termlist, newedge.endindex, newedge.endindex, 0)
       end
