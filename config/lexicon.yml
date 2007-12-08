@@ -116,41 +116,41 @@ TV: #(S\NP)/NP
     slash: any
     dir: right
 
-TV1: #(S\NP)/PP/NP
-  Root: S
-  Start: true
-  Arg0:
-    term: NP
-    slash: any
-    dir: left
-  Arg1:
-    term: PP
-    slash: any
-    dir: right
-  Arg2:
-    term: NP
-    slash: any
-    dir: right
+#TV1: #(S\NP)/PP/NP
+#  Root: S
+#  Start: true
+#  Arg0:
+#    term: NP
+#    slash: any
+#    dir: left
+#  Arg1:
+#    term: PP
+#    slash: any
+#    dir: right
+#  Arg2:
+#    term: NP
+#    slash: any
+#    dir: right
 
-TV2: #VP/NP
-  Root: VP
-  Start: true
-  Arg0:
-    term: NP
-    slash: any
-    dir: right
-
-TV3: #VP/PP/NP
-  Root: VP
-  Start: true
-  Arg0:
-    term: PP
-    slash: any
-    dir: right
-  Arg1:
-    term: NP
-    slash: any
-    dir: right
+#TV2: #VP/NP
+#  Root: VP
+#  Start: true
+#  Arg0:
+#    term: NP
+#    slash: any
+#    dir: right
+#
+#TV3: #VP/PP/NP
+#  Root: VP
+#  Start: true
+#  Arg0:
+#    term: PP
+#    slash: any
+#    dir: right
+#  Arg1:
+#    term: NP
+#    slash: any
+#    dir: right
 
 DV: #((S\NP)/NP)/NP
   Root: S
@@ -168,37 +168,37 @@ DV: #((S\NP)/NP)/NP
     slash: any
     dir: right
 
-DV0: #((S\NP)/PPto)/NP
-  Root: S
-  Start: true
-  Arg0:
-    term: NP
-    slash: any
-    dir: left
-  Arg1:
-    term: PPto
-    slash: any
-    dir: right
-  Arg2:
-    term: NP
-    slash: any
-    dir: right
-
-DV1: #((S\NP)/NP)/PPto
-  Root: S
-  Start: true
-  Arg0:
-    term: NP
-    slash: any
-    dir: left
-  Arg1:
-    term: NP
-    slash: any
-    dir: right
-  Arg2:
-    term: PPto
-    slash: any
-    dir: right
+#DV0: #((S\NP)/PPto)/NP
+#  Root: S
+#  Start: true
+#  Arg0:
+#    term: NP
+#    slash: any
+#    dir: left
+#  Arg1:
+#    term: PPto
+#    slash: any
+#    dir: right
+#  Arg2:
+#    term: NP
+#    slash: any
+#    dir: right
+#
+#DV1: #((S\NP)/NP)/PPto
+#  Root: S
+#  Start: true
+#  Arg0:
+#    term: NP
+#    slash: any
+#    dir: left
+#  Arg1:
+#    term: NP
+#    slash: any
+#    dir: right
+#  Arg2:
+#    term: PPto
+#    slash: any
+#    dir: right
 
 VP: #VP/Verb
   Root: VP

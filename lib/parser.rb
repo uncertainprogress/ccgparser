@@ -64,8 +64,6 @@ module CCGParser
 				end
       end
 			
-			
-			
 			parse_from(startarray, 0)
       
 		rescue WordNotFound => e
@@ -88,7 +86,7 @@ module CCGParser
 					newarr = termarray.clone
 					newarr[i] = cat.clone
 					begin						
-						return if parse_from(newarr, i)
+						return parse_from(newarr, i)
 					rescue IncorrectPOS => e
 						puts "Wrong starting part of speech - #{e.message} \n\n" if DEBUG_OUTPUT
 					rescue NoMatchingCategory => e
@@ -149,6 +147,7 @@ module CCGParser
 			raise NoCombinationCategories unless combined
 			
 			parse(prs, startposition, prs[startposition]) #recursively parse
+			return true
 		end
 		
 		private #-----------------------------------------------------------
@@ -173,9 +172,13 @@ module CCGParser
 			return false, startposition
 		end
 		
-		def chart_parse_right(prs, startposition)
+		def chart_parse_right(prs, startposition, target = nil)
 			if prs[startposition+1].is_a? String #terminal, need to charparse right to get a category
-				numparsed, newcat = ChartParser.new.parse(prs[startposition+1..prs.length-1], prs[startposition], :right)
+				if target
+					numparsed, newcat = ChartParser.new.parse(prs[startposition+1..prs.length-1], prs[startposition], :right, target)
+				else
+					numparsed, newcat = ChartParser.new.parse(prs[startposition+1..prs.length-1], prs[startposition], :right)
+				end
 				raise IncorrectPOS, "#{category} is an incorrect part of speech." unless numparsed
 				numparsed.downto(1) {|n| prs[startposition + n] = nil}
 				prs[startposition + 1] = newcat.clone
@@ -270,18 +273,42 @@ module CCGParser
 			#[S] and [S] ->?
 			#List: pos, pos, and pos
 			
+			#CONJUNCTION TO THE LEFT
 			if prs.conjunction_left?(startposition)
 				conpos = prs.conjunction_position
 				return false, startposition unless prs[conpos+1].is_a? Category
 				
 				if prs[conpos-1].is_a? Category #time to combine, or there's actually <clause> and <clause>
 					if prs[conpos-1].start #this is a clause
+						if prs[conpos-2].is_a? Category #combine the clauses
+							idx = 0 #prs[0..conpos].length
+							left = prs[0..conpos-1]
+							right = prs[conpos+1..prs.length-1]
+							while(true)
+								break if left[idx] != right[idx]
+								idx += 1
+              end
+							raise ConjunctionCombinationError unless idx > 0
+							#combine
+							idx.downto(0) do |i|
+								prs[conpos-i] = nil			
+              end
+							prs.compact!
+							CCGParser::print_trace(prs, startposition, "Clause combination over conjunction") if DEBUG_OUTPUT
+							return true, startposition-idx
+						else #parse to get the necessary categories
+							result, newpos = chart_parse_left(prs, conpos-1, prs[conpos-1].first_arg_left)
+							startposition -= conpos-newpos if newpos != conpos
+							return result, startposition
+            end
+						
+						
 					else #combine across the categories
 						if prs[conpos-1] == prs[conpos+1]
 							prs[conpos-1] = nil
 							prs[conpos] = nil
 							prs.compact!
-							CCGParser::print_trace(prs, startposition, "Conjunction combination") if DEBUG_OUTPUT
+							CCGParser::print_trace(prs, startposition, "POS combination over conjunction") if DEBUG_OUTPUT
 							return true, startposition-2
 						else
 							raise ConjunctionCombinationError
@@ -289,16 +316,34 @@ module CCGParser
           end
 					
 				else #This can't be clause and clause, so look for <pos> and <pos>
-					 result, newpos = chart_parse_left(prs, conpos, prs[startposition].first_arg_left)
-					 if newpos != conpos
-						 startposition -= conpos-newpos
-           end
-					 return result, startposition
+					result, newpos = chart_parse_left(prs, conpos, prs[startposition].first_arg_left)
+					startposition -= conpos-newpos if newpos != conpos
+					return result, startposition
         end
       end
 			
+			#CONJUNCTIONS TO THE RIGHT
 			if prs.conjunction_right?(startposition)
+				conpos = prs.conjunction_position
+				return false, startposition unless prs[conpos-1].is_a? Category
 				
+				if prs[conpos+1].is_a? Category #time to combine, or <clause> and <clause>
+					if prs[conpos+1].start #clause handling
+						#DON'T handle clauses from the left of the conjunction at this point, fail and handle them from the right
+					else #combine
+						if prs[conpos-1] == prs[conpos+1]
+							prs[conpos+1] = nil
+							prs[conpos] = nil
+							prs.compact!
+							CCGParser::print_trace(prs, startposition, "Conjunction combination") if DEBUG_OUTPUT
+							return true, startposition
+						else
+							raise ConjunctionCombinationError
+						end
+          end
+				else #this can't be clause and clause, so parse for <pos> and <pos>
+					result, newpos = chart_parse_right(prs, conpos, prs[startposition].first_arg_right)
+        end
       end
 			
 			
