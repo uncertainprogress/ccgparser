@@ -7,15 +7,15 @@ module CCGParser
       @typeraise = false
     end
     
-    def parse(terminals, category, direction)
+    def parse(terminals, category, direction, target = nil)
       
       @direction = direction
       @terminals = terminals
       if direction == :left
         @reverse = true
-        target = category.first_arg_left
+				target = category.first_arg_left unless target        
       elsif direction == :right
-        target = category.first_arg_right
+        target = category.first_arg_right unless target
       end
       
       raise IncorrectPOS, "#{category} does not combine within the sentence" unless target

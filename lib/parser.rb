@@ -1,7 +1,7 @@
 %w(rubygems active_record yaml).each{|f| require f}
 
 #CCGParser classes
-%w(argument category lexicon word morph chartparser edge edgelist).each{|f| require 'lib/'+f}
+%w(argument category lexicon word morph chartparser edge edgelist util).each{|f| require 'lib/'+f}
 
 
 module CCGParser
@@ -23,6 +23,7 @@ module CCGParser
   class NoMatchingCategory < Exception; end
   class NoSlashArgument < Exception; end
 	class NoCombinationCategories < Exception; end
+	class ConjunctionCombinationError < Exception; end
   
   def self.print_trace(prs, position, message)
     out = '['
@@ -62,6 +63,9 @@ module CCGParser
 					startarray[i] = word.clone
 				end
       end
+			
+			
+			
 			parse_from(startarray, 0)
       
 		rescue WordNotFound => e
@@ -83,7 +87,7 @@ module CCGParser
 				arr.each do |cat|
 					newarr = termarray.clone
 					newarr[i] = cat.clone
-					begin
+					begin						
 						return if parse_from(newarr, i)
 					rescue IncorrectPOS => e
 						puts "Wrong starting part of speech - #{e.message} \n\n" if DEBUG_OUTPUT
@@ -93,8 +97,10 @@ module CCGParser
 						puts "#{e.message} \n\n" if DEBUG_OUTPUT
 					rescue NoCombinationCategories => e
 						puts "Failure to find combinable categories \n\n" if DEBUG_OUTPUT
-					rescue NoMethodError => e
-						puts "Failure to find combinalble categories \n\n" if DEBUG_OUTPUT
+					rescue ConjunctionCombinationError => e
+						puts "Attempt to combine unlike parts of speech with a conjunction\n\n"
+						#					rescue NoMethodError => e
+						#						puts "Failure to find combinalble  (Not a category) \n\n" if DEBUG_OUTPUT
 					end
 				end
 			end
@@ -110,17 +116,8 @@ module CCGParser
 			CCGParser::print_trace(prs, startposition, "Start") if DEBUG_OUTPUT
       
 			#conjunction handling
+			combined, startposition = conjunction_parse(prs, startposition)
 			
-			
-			
-			unless combined
-				#terminal or category to the left?
-				combined, startposition = chart_parse_left(prs, startposition)
-      
-				#terminal or category to the right?
-				combined, startposition = chart_parse_right(prs, startposition)
-			end
-      
 			#type raising
 			#if the category at position-1 is an NP for type-raising, then replace the previous NP with the type-raising operator
 			unless combined
@@ -131,6 +128,7 @@ module CCGParser
 			unless combined
 				combined, startposition = combine_left(prs, startposition)
 			end
+			
 			unless combined
 				combined, startposition = combine_right(prs, startposition)
 			end
@@ -139,16 +137,30 @@ module CCGParser
 			unless combined
 				combined, startposition = apply(prs, startposition)
 			end
+			
+			unless combined
+				#terminal or category to the left?
+				combined, startposition = chart_parse_left(prs, startposition)
+      
+				#terminal or category to the right?
+				combined, startposition = chart_parse_right(prs, startposition)
+			end
         
 			raise NoCombinationCategories unless combined
 			
 			parse(prs, startposition, prs[startposition]) #recursively parse
 		end
 		
-		def chart_parse_left(prs, startposition)
+		private #-----------------------------------------------------------
+		
+		def chart_parse_left(prs, startposition, target = nil)
 			unless startposition == 0
 				if prs[startposition-1].is_a? String #this is a terminal, need to chart-parse left to get a category
-					numparsed, newcat = ChartParser.new.parse(prs[0..startposition-1].reverse, prs[startposition], :left)
+					if target
+						numparsed, newcat = ChartParser.new.parse(prs[0..startposition-1].reverse, prs[startposition], :left, target)
+					else
+						numparsed, newcat = ChartParser.new.parse(prs[0..startposition-1].reverse, prs[startposition], :left)
+          end
 					raise IncorrectPOS, "#{category} is an incorrect part of speech." unless numparsed
 					numparsed.downto(1) {|n| prs[startposition - n] = nil}
 					prs[startposition-1] = newcat.clone
@@ -175,7 +187,7 @@ module CCGParser
 		end
 		
 		def type_raise(prs, startposition)
-			if startposition > 0 && prs[startposition-1].typeraise 
+			if startposition > 0 && prs[startposition-1].is_a?(Category) && prs[startposition-1].typeraise 
 				newcat = prs[startposition-1].raise_with(prs[startposition])
 				if newcat
 					prs[startposition-1] = nil
@@ -242,6 +254,58 @@ module CCGParser
 			CCGParser::print_trace(prs, startposition, "Apply - #{direction}") if DEBUG_OUTPUT
 			return operated, startposition
 		end
+		
+		def conjunction_parse(prs, startposition)
+			#flag conjunctions
+			prs.each_with_index do |ele, i|
+				next if ele.is_a?(Category)
+				Word.find_pos(ele).each {|w| prs[i] = ConjunctionCategory.new if w.pos == "Con" } 
+			end
+			
+			return false, startposition unless prs.has_conjunction?
+			
+			#pos and pos -> left of current (subject)
+			#pos and pos --> right of current (object)
+			#clause and clause
+			#[S] and [S] ->?
+			#List: pos, pos, and pos
+			
+			if prs.conjunction_left?(startposition)
+				conpos = prs.conjunction_position
+				return false, startposition unless prs[conpos+1].is_a? Category
+				
+				if prs[conpos-1].is_a? Category #time to combine, or there's actually <clause> and <clause>
+					if prs[conpos-1].start #this is a clause
+					else #combine across the categories
+						if prs[conpos-1] == prs[conpos+1]
+							prs[conpos-1] = nil
+							prs[conpos] = nil
+							prs.compact!
+							CCGParser::print_trace(prs, startposition, "Conjunction combination") if DEBUG_OUTPUT
+							return true, startposition-2
+						else
+							raise ConjunctionCombinationError
+						end
+          end
+					
+				else #This can't be clause and clause, so look for <pos> and <pos>
+					 result, newpos = chart_parse_left(prs, conpos, prs[startposition].first_arg_left)
+					 if newpos != conpos
+						 startposition -= conpos-newpos
+           end
+					 return result, startposition
+        end
+      end
+			
+			if prs.conjunction_right?(startposition)
+				
+      end
+			
+			
+			
+			
+			return false, startposition
+    end
 		
 	end 
 end
