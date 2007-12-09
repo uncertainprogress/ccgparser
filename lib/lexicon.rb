@@ -7,6 +7,7 @@ module CCGParser
 			@@entries = []  #internal store for all the categories
 			lex = YAML::load_file(filename)
 			lex.each do |entry|
+				cat = Category.new(entry)
 				@@entries << Category.new(entry)
 			end
 			

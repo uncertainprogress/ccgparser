@@ -100,6 +100,9 @@ module CCGParser
 						puts "Attempt to combine unlike parts of speech with a conjunction\n\n"
 						#					rescue NoMethodError => e
 						#						puts "Failure to find combinalble  (Not a category) \n\n" if DEBUG_OUTPUT
+					rescue Exception => e
+						puts e.message
+						puts e.backtrace.join("\n")
 					end
 				end
 			end
@@ -140,7 +143,9 @@ module CCGParser
 			unless combined
 				#terminal or category to the left?
 				combined, startposition = chart_parse_left(prs, startposition)
-      
+			end
+			
+			unless combined
 				#terminal or category to the right?
 				combined, startposition = chart_parse_right(prs, startposition)
 			end
@@ -281,7 +286,7 @@ module CCGParser
 			#List: pos, pos, and pos
 			
 			#[S] and [S]
-			unless @conjcombination
+			unless @conjcombination #attempt this operation a single time
 				begin
 					left = prs[0..conpos-1]
 					right = prs[conpos+1..-1]

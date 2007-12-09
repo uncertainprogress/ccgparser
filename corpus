@@ -2,22 +2,26 @@
 #I might read the book
 #I read the book by the river
 #I might read the book by the river
+
 #I give her the book
 #I give the book to her
 #I gave to her the book
 #I might give her the book
 #I might give the book to her
 
-
 #Marcel and I proved completeness
 #I read the book and the newspaper
+
 #Marcel proved and I disproved completeness
 #I gave the book to him and her
 #I prove and disprove completeness
 #Marcel is smart and talented
 #I read the book and I read the newspaper
+#Marcel proved or I disproved completeness
 
-Marcel had proved and I had disproved completeness
-#I had done that
-#I went to the racetrack, the beach, and the store
+I had done that
+
+#NOT WORKING
+#Marcel had proved or I had disproved completeness
+#I went to the racetrack, the beach, and the storen
 

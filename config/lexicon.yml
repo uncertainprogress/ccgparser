@@ -116,41 +116,41 @@ TV: #(S\NP)/NP
     slash: any
     dir: right
 
-#TV1: #(S\NP)/PP/NP
-#  Root: S
-#  Start: true
-#  Arg0:
-#    term: NP
-#    slash: any
-#    dir: left
-#  Arg1:
-#    term: PP
-#    slash: any
-#    dir: right
-#  Arg2:
-#    term: NP
-#    slash: any
-#    dir: right
+TV1: #(S\NP)/PP/NP
+  Root: S
+  Start: true
+  Arg0:
+    term: NP
+    slash: any
+    dir: left
+  Arg1:
+    term: PP
+    slash: any
+    dir: right
+  Arg2:
+    term: NP
+    slash: any
+    dir: right
 
-#TV2: #VP/NP
-#  Root: VP
-#  Start: true
-#  Arg0:
-#    term: NP
-#    slash: any
-#    dir: right
-#
-#TV3: #VP/PP/NP
-#  Root: VP
-#  Start: true
-#  Arg0:
-#    term: PP
-#    slash: any
-#    dir: right
-#  Arg1:
-#    term: NP
-#    slash: any
-#    dir: right
+TV2: #VP/NP
+  Root: VP
+  Start: true
+  Arg0:
+    term: NP
+    slash: any
+    dir: right
+
+TV3: #VP/PP/NP
+  Root: VP
+  Start: true
+  Arg0:
+    term: PP
+    slash: any
+    dir: right
+  Arg1:
+    term: NP
+    slash: any
+    dir: right
 
 DV: #((S\NP)/NP)/NP
   Root: S
@@ -207,6 +207,34 @@ DV1: #((S\NP)/NP)/NP/PPto
     term: PPto
     slash: any
     dir: right
+
+DV2: #VP/NP/NP
+  Root: VP
+  Start: true
+  Arg0:
+    term: NP
+    slash: any
+    dir: right
+  Arg1:
+    term: NP
+    slash: any
+    dir: right
+
+DV3: #VP/NP/PPto/NP
+  Root: VP
+  Start: true
+  Arg0:
+    term: NP
+    slash: any
+    dir: right
+  Arg1:
+    term: PPto
+    slash: any
+    dir: right
+  Arg2:
+    term: NP
+    slash: any
+    dir: right
   
 
 VP: #VP/Verb
@@ -229,85 +257,85 @@ AUX: #S\NP/VP
     slash: any
     dir: right
 
-AUX1: #S\NP/NP/VP
-  Root: S
-  Aux: true
-  Start: true
-  Arg0:
-    term: NP
-    slash: any
-    dir: left
-  Arg1: 
-    term: NP
-    slash: any
-    dir: right
-  Arg2:
-    term: VP
-    slash: any
-    dir: right
-
-AUX2: #S\NP/PP/NP/VP
-  Root: S
-  Aux: true
-  Start: true
-  Arg0:
-    term: NP
-    slash: any
-    dir: left
-  Arg1:
-    term: PP
-    slash: any
-    dir: right
-  Arg2:
-    term: NP
-    slash: any
-    dir: right
-  Arg3:
-    term: VP
-    slash: any
-    dir: right
-
-AUX3: #S\NP/NP/NP/VP
-  Root: S
-  Aux: true
-  Start: true
-  Arg0:
-    term: NP
-    slash: any
-    dir: left
-  Arg1:
-    term: NP
-    slash: any
-    dir: right
-  Arg2:
-    term: NP
-    slash: any
-    dir: right
-  Arg3:
-    term: VP
-    slash: any
-    dir: right
-
-AUX4: #S\NP/PPto/NP/VP
-  Root: S
-  Aux: true
-  Start: true
-  Arg0:
-    term: NP
-    slash: any
-    dir: left
-  Arg1:
-    term: PPto
-    slash: any
-    dir: right
-  Arg2:
-    term: NP
-    slash: any
-    dir: right
-  Arg3:
-    term: VP
-    slash: any
-    dir: right
+#AUX1: #S\NP/NP/VP
+#  Root: S
+#  Aux: true
+#  Start: true
+#  Arg0:
+#    term: NP
+#    slash: any
+#    dir: left
+#  Arg1: 
+#    term: NP
+#    slash: any
+#    dir: right
+#  Arg2:
+#    term: VP
+#    slash: any
+#    dir: right
+#
+#AUX2: #S\NP/PP/NP/VP
+#  Root: S
+#  Aux: true
+#  Start: true
+#  Arg0:
+#    term: NP
+#    slash: any
+#    dir: left
+#  Arg1:
+#    term: PP
+#    slash: any
+#    dir: right
+#  Arg2:
+#    term: NP
+#    slash: any
+#    dir: right
+#  Arg3:
+#    term: VP
+#    slash: any
+#    dir: right
+#
+#AUX3: #S\NP/NP/NP/VP
+#  Root: S
+#  Aux: true
+#  Start: true
+#  Arg0:
+#    term: NP
+#    slash: any
+#    dir: left
+#  Arg1:
+#    term: NP
+#    slash: any
+#    dir: right
+#  Arg2:
+#    term: NP
+#    slash: any
+#    dir: right
+#  Arg3:
+#    term: VP
+#    slash: any
+#    dir: right
+#
+#AUX4: #S\NP/PPto/NP/VP
+#  Root: S
+#  Aux: true
+#  Start: true
+#  Arg0:
+#    term: NP
+#    slash: any
+#    dir: left
+#  Arg1:
+#    term: PPto
+#    slash: any
+#    dir: right
+#  Arg2:
+#    term: NP
+#    slash: any
+#    dir: right
+#  Arg3:
+#    term: VP
+#    slash: any
+#    dir: right
 
 AUX5: #S\NP/Adj
   Root: S

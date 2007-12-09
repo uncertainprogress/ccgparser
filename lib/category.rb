@@ -57,15 +57,18 @@ module CCGParser
     
     #type raising operation
     def raise_with(other)
+			#self.arguments.each_with_index {|arg, i| puts arg.inspect}
+			#other.arguments.each {|arg| puts arg.inspect}
       self.arguments.each_with_index do |selfarg, i|
         if selfarg.nonterminal == other.root #start the composition here
           other.arguments.each_with_index do |otherarg, j|
             if self.arguments[j+i+1] 
-              next if otherarg == self.arguments[j+i+1] #match the arguments
+							(next if otherarg == self.arguments[j+i+1]) if other.arguments[j+1]
               return nil if otherarg != self.arguments[j+i+1] #fail, these categories won't compose
             end
             #otherwise, we've reached the end of self, and need to compose and return a new category
             self.arguments = []
+						j += 1 if other.arguments.length == 1 #wacky case where S/S\NP needs to compose with a lone S\NP
             self.arguments += other.arguments[j..other.arguments.length-1]
             self.typeraise = false
             return self
@@ -157,7 +160,7 @@ module CCGParser
         when 'cross'
           out << 'x'
         end
-        out << arg.nonterminal
+        out << arg.nonterminal if arg.nonterminal
       end
       out
     end
