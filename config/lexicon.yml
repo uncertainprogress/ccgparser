@@ -168,37 +168,46 @@ DV: #((S\NP)/NP)/NP
     slash: any
     dir: right
 
-#DV0: #((S\NP)/PPto)/NP
-#  Root: S
-#  Start: true
-#  Arg0:
-#    term: NP
-#    slash: any
-#    dir: left
-#  Arg1:
-#    term: PPto
-#    slash: any
-#    dir: right
-#  Arg2:
-#    term: NP
-#    slash: any
-#    dir: right
-#
-#DV1: #((S\NP)/NP)/PPto
-#  Root: S
-#  Start: true
-#  Arg0:
-#    term: NP
-#    slash: any
-#    dir: left
-#  Arg1:
-#    term: NP
-#    slash: any
-#    dir: right
-#  Arg2:
-#    term: PPto
-#    slash: any
-#    dir: right
+DV0: #((S\NP)/NP/PPto)/NP
+  Root: S
+  Start: true
+  Arg0:
+    term: NP
+    slash: any
+    dir: left
+  Arg1:
+    term: NP
+    slash: any
+    dir: right
+  Arg2:
+    term: PPto
+    slash: any
+    dir: right
+  Arg3:
+    term: NP
+    slash: any
+    dir: right
+
+DV1: #((S\NP)/NP)/NP/PPto
+  Root: S
+  Start: true
+  Arg0:
+    term: NP
+    slash: any
+    dir: left
+  Arg1:
+    term: NP
+    slash: any
+    dir: right
+  Arg2:
+    term: NP
+    slash: any
+    dir: right
+  Arg3:
+    term: PPto
+    slash: any
+    dir: right
+  
 
 VP: #VP/Verb
   Root: VP
@@ -300,6 +309,19 @@ AUX4: #S\NP/PPto/NP/VP
     slash: any
     dir: right
 
+AUX5: #S\NP/Adj
+  Root: S
+  Aux: true
+  Start: true
+  Arg0:
+    term: NP
+    slash: any
+    dir: left
+  Arg1:
+    term: Adj
+    slash: any
+    dir: right
+
 #Prepositional phrases
 PPto: #PPto
   Root: PPto
@@ -307,10 +329,10 @@ PPto: #PPto
     term: To
     slash: any
     dir: left
-  Arg1: 
-    term: NP
-    slash: any
-    dir: right
+#  Arg1: 
+#    term: NP
+#    slash: any
+#    dir: right
 PP1: #(PP\Prep)/NP
   Root: PP
   Arg0:
@@ -336,7 +358,12 @@ CON: #X\*X/*X
     dir: right
 
 #Adjective phrases
-
+Adj: #Adj/Adj - recognize a single adjective
+  Root: Adj
+  Arg0:
+    term: Adj
+    slash: any
+    dir: right
 
 #Adverbial phrases
 

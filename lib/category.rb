@@ -193,7 +193,17 @@ module CCGParser
     end
   end
 	
-	
+	class SentenceCategory < Category
+		def initialize
+			@reference = "S"
+			@root = "S"
+			
+      @start = false
+		  @typeraise = false
+      @arguments = []
+			@conjunction = false
+    end
+	end
 
 end
 

@@ -86,7 +86,8 @@ module CCGParser
 					newarr = termarray.clone
 					newarr[i] = cat.clone
 					begin						
-						return parse_from(newarr, i)
+						result = parse_from(newarr, i)
+						return result if result
 					rescue IncorrectPOS => e
 						puts "Wrong starting part of speech - #{e.message} \n\n" if DEBUG_OUTPUT
 					rescue NoMatchingCategory => e
@@ -115,7 +116,7 @@ module CCGParser
       
 			#conjunction handling
 			combined, startposition = conjunction_parse(prs, startposition)
-			
+						
 			#type raising
 			#if the category at position-1 is an NP for type-raising, then replace the previous NP with the type-raising operator
 			unless combined
@@ -262,28 +263,69 @@ module CCGParser
 			#flag conjunctions
 			prs.each_with_index do |ele, i|
 				next if ele.is_a?(Category)
-				Word.find_pos(ele).each {|w| prs[i] = ConjunctionCategory.new if w.pos == "Con" } 
+				Word.find_pos(ele).each do |w|
+					if w.pos == "Con"
+						prs[i] = ConjunctionCategory.new
+						@conjcombination = false
+					end
+        end
+				
 			end
 			
 			return false, startposition unless prs.has_conjunction?
-			
+			conpos = prs.conjunction_position
 			#pos and pos -> left of current (subject)
 			#pos and pos --> right of current (object)
 			#clause and clause
 			#[S] and [S] ->?
 			#List: pos, pos, and pos
 			
+			#[S] and [S]
+			unless @conjcombination
+				begin
+					left = prs[0..conpos-1]
+					right = prs[conpos+1..-1]
+					lstart = nil
+					rstart = nil
+					left.each_with_index {|ele, i| lstart = i if ele.is_a?(Category) && ele.start}
+					right.each_with_index {|ele, i| rstart = i if ele.is_a?(Category) && ele.start}
+					if lstart && rstart
+						pleft = parse(left, lstart, left[lstart])
+						pright = parse(right, rstart, right[rstart])
+						if pleft && pright
+							puts "Sentence <conj> Sentence parse combination" if DEBUG_OUTPUT
+							prs[0] = SentenceCategory.new
+							1.upto(prs.length){|i| prs[i] = nil}
+							prs.compact!
+							return true, 0
+						end
+					end
+				rescue Exception => e
+					puts e.message if DEBUG_OUTPUT
+					#failed
+				end
+				@conjcombination = true
+			end
+			
 			#CONJUNCTION TO THE LEFT
 			if prs.conjunction_left?(startposition)
-				conpos = prs.conjunction_position
 				return false, startposition unless prs[conpos+1].is_a? Category
 				
 				if prs[conpos-1].is_a? Category #time to combine, or there's actually <clause> and <clause>
 					if prs[conpos-1].start #this is a clause
+						
+						if prs[conpos+1] == prs[conpos-1] #verb and verb phrasing, combine and return
+							prs[conpos-1] = nil
+							prs[conpos] = nil
+							prs.compact!
+							CCGParser::print_trace(prs, startposition, "verb combination over conjunction") if DEBUG_OUTPUT
+							return true, startposition-2
+            end
+						
 						if prs[conpos-2].is_a? Category #combine the clauses
 							idx = 0 #prs[0..conpos].length
 							left = prs[0..conpos-1]
-							right = prs[conpos+1..prs.length-1]
+							right = prs[conpos+1..-1]
 							while(true)
 								break if left[idx] != right[idx]
 								idx += 1
@@ -324,7 +366,6 @@ module CCGParser
 			
 			#CONJUNCTIONS TO THE RIGHT
 			if prs.conjunction_right?(startposition)
-				conpos = prs.conjunction_position
 				return false, startposition unless prs[conpos-1].is_a? Category
 				
 				if prs[conpos+1].is_a? Category #time to combine, or <clause> and <clause>
@@ -343,6 +384,7 @@ module CCGParser
           end
 				else #this can't be clause and clause, so parse for <pos> and <pos>
 					result, newpos = chart_parse_right(prs, conpos, prs[startposition].first_arg_right)
+					return result, startposition
         end
       end
 			

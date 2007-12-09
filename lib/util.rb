@@ -3,6 +3,7 @@ class Array
 		self.each do |ele|
 			return true if ele.is_a?(CCGParser::Category) && ele.conjunction
     end
+		return false
   end
 	
 	def conjunction_left?(pos)
