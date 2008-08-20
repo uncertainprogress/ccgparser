@@ -1,14 +1,15 @@
 %w(rubygems active_record yaml).each{|f| require f}
 
 #CCGParser classes
-%w(argument category lexicon word morph chartparser edge edgelist util).each{|f| require 'lib/'+f}
+%w(argument category lexicon word morph chartparser edge edgelist util database).each{|f| require 'lib/'+f}
 
 
 module CCGParser
 	DEBUG_OUTPUT = true
-  DEBUG_CP = false
-  DEBUG_CP_EDGES = false
-
+  DEBUG_CP = true
+  DEBUG_CP_EDGES = true
+  LOGPATH = 'log/run.log'
+  
 	SLASHTYPES = {:star => true, :diamond => true, :cross => true, :any => true}.freeze
 	#star is argument application only
 	#diamond adds order-preserving composition
@@ -39,6 +40,7 @@ module CCGParser
 		#an ActiveRecord connection
 		def initialize
 			ActiveRecord::Base.establish_connection(YAML::load(File.open('config/database.yml'))['standard'])
+			ActiveRecord::Base.logger = Logger.new LOGPATH
 			Lexicon.load('config/lexicon.yml')
 		end
 		

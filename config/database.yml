@@ -1,0 +1,3 @@
+standard:
+  adapter: sqlite3
+  database: database.sqlite3
