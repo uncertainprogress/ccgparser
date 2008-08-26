@@ -6,8 +6,8 @@
 
 module CCGParser
 	DEBUG_OUTPUT = true
-  DEBUG_CP = true
-  DEBUG_CP_EDGES = true
+  DEBUG_CP = false
+  DEBUG_CP_EDGES = false
   LOGPATH = 'log/run.log'
   
 	SLASHTYPES = {:star => true, :diamond => true, :cross => true, :any => true}.freeze

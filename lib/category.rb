@@ -83,7 +83,7 @@ module CCGParser
     def apply(prs, position) #array of categories, and position of this category
       
       if self.arguments.length > 0 && self.arguments.last.direction == "left" && position != 0 #can't be at the left end of the array
-        raise(IncorrectPOS, "From postion #{position} as #{prs[position].to_s} in the parse array") unless prs[position-1]
+        raise(IncorrectPOS, "From position #{position} as #{prs[position].to_s} in the parse array") unless prs[position-1]
         
         if (prs[position-1].is_a? Category) && (!prs[position-1].has_arguments?) && (self.arguments.last.nonterminal == prs[position-1].root)
           newcat = self.clone
@@ -91,7 +91,7 @@ module CCGParser
           return newcat, :left
         end
       elsif self.arguments.length > 0 && self.arguments.last.direction == "right"
-        raise(IncorrectPOS, "From postion #{position} as #{prs[position].to_s} in the parse array") unless prs[position+1]
+        raise(IncorrectPOS, "From position #{position} as #{prs[position].to_s} in the parse array") unless prs[position+1]
         
         if (prs[position+1].is_a? Category) && !prs[position+1].has_arguments? && (self.arguments.last.nonterminal == prs[position+1].root)
           newcat = self.clone
